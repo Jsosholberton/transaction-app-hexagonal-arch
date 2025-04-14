@@ -1,0 +1,19 @@
+services:
+  db: # Definition of the PostgreSQL database service.
+    image: postgres:latest # Docker image used to create the container, in this case, the latest version of PostgreSQL.
+    restart: always # Configuration to restart the container whenever Docker or the operating system restarts.
+    environment:
+      - POSTGRES_USER=postgres # Username for the PostgreSQL database.
+      - POSTGRES_PASSWORD=postgres # Password for the PostgreSQL database user.
+      - POSTGRES_HOST_AUTH_METHOD=trust # Authentication method for PostgreSQL, set to 'trust' for local development.
+    ports:
+      - "5430:5432" # Mapping port 5432 of the container to port 5430 of the host.
+    volumes:
+      - db:/var/lib/postgresql/data # Mounting a volume to persist database data in the /var/lib/postgresql/data directory inside the container.
+
+volumes:
+  db: # Definition of a volume named "db".
+    driver: local # Type of local volume driver.
+
+  cache: # Definition of a volume named "cache".
+    driver: local # Type of local volume driver.

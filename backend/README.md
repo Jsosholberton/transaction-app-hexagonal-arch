@@ -1,24 +1,23 @@
 # Backend
 
-## Infrastructure
+## ⚙️ Infrastructure
 
-This project follows a serverless architecture, using NestJS deployed to AWS Lambda, exposed via API Gateway, and connected to a PostgreSQL database.
+This project follows a **serverless architecture** powered by **NestJS**, deployed to **AWS Lambda**, exposed via **API
+Gateway**, and connected to a **PostgreSQL** database.
 
-### Components
+---
 
-- AWS Lambda: Runs the NestJS application as a single handler
+### 🧩 Components
 
-- API Gateway: Proxies all HTTP traffic to Lambda
+- **AWS Lambda**: Runs the NestJS application as a single Lambda handler.
+- **API Gateway**: Routes and manages all HTTP traffic to the Lambda function.
+- **PostgreSQL**: Managed or local instance used for persistent storage.
+- **S3 + DynamoDB**: Used to manage Terraform backend state with locking.
+- **Terraform**: Manages all cloud infrastructure as code.
 
-- PostgreSQL: Cloud-managed or local DB for persistent data
+---
 
-- S3 + DynamoDB: Used for state lock the terraform backend
-
-- S3: Used to store media files
-
-- Terraform: Used to provision and manage all infrastructures
-
-### Architecture Diagram
+### 🗺️ Architecture Diagram (Mermaid)
 
 ```mermaid
 flowchart TD
@@ -33,44 +32,210 @@ flowchart TD
     end
 ```
 
-## Setup
+### 🛠️ Setup Instructions
 
-### Prerequisites
-- [Node.js](https://nodejs.org/en/download/) (v18 or later)
-- [NestJS CLI](https://docs.nestjs.com/cli/overview) (v9 or later)
-- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) (v2 or later)
-- [Terraform](https://www.terraform.io/downloads.html) (v1.5 or later)
-- [Docker](https://docs.docker.com/get-docker/) (for local development and migrations)
+#### ✅ Prerequisites
 
-### Makefile
-The Makefile is used to simplify the development process. It contains various commands for building, testing, and deploying the application.
-- `make init`: Initializes the project by installing dependencies and setting up the terraform environment.
-- `make plan`: Generates an execution plan for the terraform infrastructure.
-- `make apply`: Applies the terraform plan to create or update the infrastructure.
-- `make destroy`: Destroys the terraform-managed infrastructure.
-- `make validate`: Validates the terraform configuration files.
-- `make pkg`: Packages the NestJS application for deployment.
+Make sure you have the following tools installed:
 
-### Environment Variables
-The application uses environment variables for configuration. Create a `.env` file in the root directory and add the following variables:
+- [Node.js](https://nodejs.org/en/download/) (v18+)
+- [NestJS CLI](https://docs.nestjs.com/cli/overview) (v9+)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) (v2+)
+- [Terraform](https://www.terraform.io/downloads.html) (v1.5+)
+- [Docker](https://docs.docker.com/get-docker/) (for local development and DB migrations)
+
+---
+
+#### 🧪 Makefile Commands
+
+The `Makefile` provides commands to simplify the infrastructure workflow:
+
+| Command           | Description                                   |
+|-------------------|-----------------------------------------------|
+| `make init`       | Initialize Terraform and install dependencies |
+| `make plan`       | Generate Terraform execution plan             |
+| `make apply`      | Deploy the infrastructure                     |
+| `make destroy`    | Remove all Terraform-managed infrastructure   |
+| `make validate`   | Validate Terraform configuration              |
+| `make pkg`        | Package the NestJS app for Lambda deployment  |
+| `make migrations` | Run database migrations using TypeORM         |
+
+---
+
+#### 🧾 Environment Variables
+
+Create a `.env` file in the project root with the following variables:
 
 ```dotenv
-PROJECT_NAME=name-of-your-project
-S3_BUCKET_NAME=name-of-the-s3-bucket-for-state-lock
-AWS_REGION=name-of-the-region
+PROJECT_NAME=your-project-name
+S3_BUCKET_NAME=terraform-state-lock-bucket
+AWS_REGION=your-aws-region
 ```
 
-### Installing Dependencies
-To install the required dependencies, run the following command:
+Create a `.env` file in the `src` folder with the following variables:
+
+```dotenv
+POSTGRES_HOST=localhost
+POSTGRES_USERNAME=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_NAME=postgres
+POSTGRES_PORT=5430
+```
+
+> [!NOTE]
+> The environment variables in the `src` folder are used only for local development.
+> The variables used on AWS are set up through Terraform.
+
+---
+
+#### 📦 Install Dependencies
+
+Run this command to install all required project dependencies:
 
 ```bash
 npm install
 ```
 
-### Local Development
-To run the application locally, use the following command:
+---
+
+#### 🧪 Run Locally
+
+To run the app locally with hot-reload:
 
 ```bash
 npm run start:local
 ```
-This will start the application on `http://localhost:3000`.
+
+The application will be available at `http://localhost:3000`.
+
+## Backend
+
+This backend is built with **NestJS** and follows a domain-driven and hexagonal architecture. It manages products,
+customers, transactions, and deliveries, and integrates with the Wompi payment system.
+
+---
+
+## 📦 Modules Overview
+
+### ✅ Products
+
+- List all products
+- Get product by ID
+
+### 👤 Customers
+
+- Embedded in transaction creation
+- No standalone endpoint
+
+### 💳 Transactions
+
+- Create transaction (with customer data)
+- Update transaction status
+- Get transactions by customer email
+
+### 🚚 Deliveries
+
+- Automatically created through transaction creation
+- Delivery status and tracking number managed internally
+
+---
+
+## 📁 Routes
+
+| Method | Endpoint                   | Description                        |
+|--------|----------------------------|------------------------------------|
+| GET    | `/products`                | List all products                  |
+| GET    | `/products/:id`            | Get a product by ID                |
+| POST   | `/transactions`            | Create a transaction               |
+| PATCH  | `/transactions/:id/status` | Update transaction status          |
+| GET    | `/transactions/by-email`   | Get transactions by customer email |
+
+---
+
+## 📦 DTOs
+
+### `CreateTransactionDto`
+
+Includes:
+
+- Product ID
+- Customer data (name, email, address, phone)
+- Total amount
+- Quantity
+- Initial status (default: `PENDING`)
+- Optional: Wompi transaction ID
+
+### `UpdateTransactionDto`
+
+Includes:
+
+- New status (`APPROVED` or `REJECTED`)
+- Optional: Wompi transaction ID
+
+### `GetTransactionsByEmailDto`
+
+Includes:
+
+- Customer email (validated)
+
+---
+
+## 🧠 Domain Models
+
+Each database model has a corresponding domain entity.
+Conversion is handled via static methods:
+
+- `toDomain()` – maps from DB model to domain entity
+- `fromDomain()` – maps from domain entity to DB model
+
+---
+
+## 🔗 Relationships
+
+- A `Transaction` belongs to a `Product` and a `Customer`
+- A `Delivery` is linked **1:1** with a `Transaction`
+
+---
+
+## 📊 Entity Diagram (Mermaid)
+
+```mermaid
+erDiagram
+    CUSTOMER ||--o{ TRANSACTION : makes
+    PRODUCT ||--o{ TRANSACTION : includes
+    TRANSACTION ||--|| DELIVERY : has
+
+    CUSTOMER {
+      uuid id PK
+      string name
+      string email
+      string address
+      string phone
+      date createdAt
+    }
+
+    PRODUCT {
+      uuid id PK
+      string name
+      string description
+      decimal price
+      int stock
+      string imageUrl
+    }
+
+    TRANSACTION {
+      uuid id PK
+      decimal totalAmount
+      int quantity
+      string status
+      string wompiTransactionId
+      date createdAt
+    }
+
+    DELIVERY {
+      uuid id PK
+      string status
+      string trackingNumber
+      date createdAt
+    }
+```

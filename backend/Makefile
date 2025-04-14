@@ -16,7 +16,7 @@ plan:
 apply:
 	@echo "Starting Terraform apply process..."
 	cd terraform && terraform apply && \
-	terraform output > ../tests/.env
+	terraform output > ../src/.env.local
 
 destroy:
 	@echo terraform destroy
@@ -32,4 +32,17 @@ pkg:
 	rm -rf dist && npx tsc && \
 	cp -r node_modules dist && \
 	cd dist && zip -r $(PROJECT_NAME)-lambda.zip .
+
+# Migrations
+migrations:
+	@echo "Starting Docker containers"
+	docker-compose up -d
+	@trap 'docker-compose down -v; exit 1' ERR; \
+	echo "Running initial migrations"; \
+	npm run run-migrations; \
+	echo "Generating new migration"; \
+	npm run gen-migration; \
+	echo "Running new migrations"; \
+	npm run run-migrations; \
+	docker-compose down -v
 

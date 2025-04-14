@@ -1,20 +1,18 @@
 swagger: "2.0"
 info:
   version: "1.0"
-  title: Hello world endpoint
-  description: A simple hello world endpoint
+  title: Application API
+  description: REST API for the application
 
 paths:
-  /hello-world:
+  /products:
     get:
-      summary: Get user chats
+      summary: Get all products
       x-amazon-apigateway-integration:
-        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${helloWorldLambdaArn}/invocations"
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
         responses:
           default:
-            statusCode: "200"
-            responseParameters:
-              method.response.header.Access-Control-Allow-Origin: "'*'" # Replace '*' with your actual allowed origin
+            statusCode: "200" # Removed responseParameters.Access-Control-Allow-Origin
         httpMethod: "POST"
         type: "aws_proxy"
       responses:
@@ -46,10 +44,10 @@ paths:
               default: "'*'" # Ideally, replace '*' with your specific allowed origins
             Access-Control-Allow-Methods:
               type: string
-              default: "'GET,POST,PUT,PATCH,OPTIONS,DELETE'"
+              default: "'GET,POST,PUT,OPTIONS,DELETE'"
             Access-Control-Allow-Headers:
               type: string
-              default: "'Content-Type'"
+              default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
       x-amazon-apigateway-integration:
         type: mock
         requestTemplates:
@@ -59,6 +57,228 @@ paths:
             statusCode: "200"
             responseParameters:
               method.response.header.Access-Control-Allow-Origin: "'*'" # Same here for specific origins
-              method.response.header.Access-Control-Allow-Methods: "'GET,POST,PUT,PATCH,OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            responseTemplates:
+              application/json: ""
+
+  /products/{id}:
+    get:
+      summary: Get a product by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+          description: The ID of the product to retrieve
+      responses:
+        200:
+          description: "Successful response"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'"
+            Access-Control-Allow-Methods:
+              type: string
+              default: "'GET,POST,OPTIONS'"
+            Access-Control-Allow-Headers:
+              type: string
+              default: "'Content-Type'"
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+        responses:
+          default:
+            statusCode: "200" # Removed responseParameters.Access-Control-Allow-Origin
+        httpMethod: "POST"
+        type: "aws_proxy"
+    options:
+      summary: CORS support
+      description: Send a preflight request to check for CORS
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: CORS response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'" # Ideally, replace '*' with your specific allowed origins
+            Access-Control-Allow-Methods:
+              type: string
+              default: "'GET,POST,PUT,OPTIONS,DELETE'"
+            Access-Control-Allow-Headers:
+              type: string
+              default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'" # Same here for specific origins
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            responseTemplates:
+              application/json: ""
+
+  /transactions:
+    post:
+      summary: Create a new transaction
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+        responses:
+          default:
+            statusCode: "200" # Removed responseParameters.Access-Control-Allow-Origin
+        httpMethod: "POST"
+        type: "aws_proxy"
+      responses:
+        200:
+          description: "Transaction created"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'"
+    options:
+      summary: CORS support
+      description: Send a preflight request to check for CORS
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: CORS response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'" # Ideally, replace '*' with your specific allowed origins
+            Access-Control-Allow-Methods:
+              type: string
+              default: "'GET,POST,PUT,OPTIONS,DELETE'"
+            Access-Control-Allow-Headers:
+              type: string
+              default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'" # Same here for specific origins
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            responseTemplates:
+              application/json: ""
+
+  /transactions/{id}/status:
+    patch:
+      summary: Update transaction status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: string
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+        responses:
+          default:
+            statusCode: "200" # Removed responseParameters.Access-Control-Allow-Origin
+        httpMethod: "POST"
+        type: "aws_proxy"
+      responses:
+        200:
+          description: "Transaction status updated"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'"
+    options:
+      summary: CORS support
+      description: Send a preflight request to check for CORS
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: CORS response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'" # Ideally, replace '*' with your specific allowed origins
+            Access-Control-Allow-Methods:
+              type: string
+              default: "'GET,POST,PUT,OPTIONS,DELETE'"
+            Access-Control-Allow-Headers:
+              type: string
+              default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'" # Same here for specific origins
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            responseTemplates:
+              application/json: ""
+
+  /transactions/by-email:
+    get:
+      summary: Get transactions by email
+      x-amazon-apigateway-integration:
+        uri: "arn:aws:apigateway:${region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations"
+        responses:
+          default:
+            statusCode: "200" # Removed responseParameters.Access-Control-Allow-Origin
+        httpMethod: "POST"
+        type: "aws_proxy"
+      responses:
+        200:
+          description: "Transactions retrieved"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'"
+    options:
+      summary: CORS support
+      description: Send a preflight request to check for CORS
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: CORS response
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+              default: "'*'" # Ideally, replace '*' with your specific allowed origins
+            Access-Control-Allow-Methods:
+              type: string
+              default: "'GET,POST,PUT,OPTIONS,DELETE'"
+            Access-Control-Allow-Headers:
+              type: string
+              default: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'" # Same here for specific origins
+              method.response.header.Access-Control-Allow-Methods: "'GET,POST,OPTIONS,DELETE'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
             responseTemplates:
               application/json: ""

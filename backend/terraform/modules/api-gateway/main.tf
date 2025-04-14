@@ -47,8 +47,8 @@ resource "aws_api_gateway_rest_api" "api" {
   binary_media_types = ["multipart/form-data"]
   description = "${var.project_name} API Gateway for ${var.environment}"
   body = templatefile("./template/swagger.yaml", {
-    region              = var.region
-    helloWorldLambdaArn = var.helloWorldLambdaArn
+    region    = var.region
+    LambdaArn = var.LambdaArn
   })
 
   tags = {

@@ -14,7 +14,7 @@ provider "aws" {
     tags = {
       "Terraform"   = "true"
       "Environment" = var.environment[terraform.workspace]
-      "Project"     = local.envs["PROJECT_NAME"]
+      "Project"     = var.project_name
     }
   }
 }

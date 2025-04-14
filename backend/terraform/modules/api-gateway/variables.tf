@@ -13,7 +13,7 @@ variable "region" {
   type        = string
 }
 
-variable "helloWorldLambdaArn" {
+variable "LambdaArn" {
   description = "ARN of the Hello World Lambda function"
   type        = string
 }

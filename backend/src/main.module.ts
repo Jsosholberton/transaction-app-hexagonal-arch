@@ -1,7 +1,16 @@
-import { Module } from '@nestjs/common';
-import { HelloWorldModule } from './hello-world/interface/rest/hello-world.module';
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { DbModule } from "./infrastructure/database/db.module";
+import { ProductsModule } from "./interface/rest/modules/product.module";
+import { TransactionModule } from "./interface/rest/modules/transaction.module";
 
 @Module({
-  imports: [HelloWorldModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    DbModule,
+    ProductsModule,
+    TransactionModule
+  ],
 })
-export class AppModule {}
+export class AppModule {
+}
