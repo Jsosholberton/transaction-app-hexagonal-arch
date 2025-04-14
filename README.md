@@ -10,9 +10,11 @@ Frontend: ReactJS, Vite, Redux Toolkit, TailwindCSS, React Router
 
 ## 📂 Structure
 
+```plain_text
 project-root/
 ├── backend/    # API, DB access, infrastructure
 ├── frontend/   # SPA using React and Redux
+```
 
 Each folder contains its own README:
 
